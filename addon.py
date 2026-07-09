@@ -10,6 +10,8 @@ import time
 import requests
 import tempfile
 import traceback
+import importlib
+import sys
 import os
 import shutil
 import zipfile
@@ -493,7 +495,12 @@ class BlenderMCPServer:
         # This is powerful but potentially dangerous - use with caution
         try:
             # Create a local namespace for execution
-            namespace = {"bpy": bpy}
+            namespace = {
+                "bpy": bpy,
+                "importlib": importlib,
+                "sys": sys,
+                "traceback": traceback,
+            }
 
             # Capture stdout during execution, and return it as result
             capture_buffer = io.StringIO()
@@ -503,7 +510,11 @@ class BlenderMCPServer:
             captured_output = capture_buffer.getvalue()
             return {"executed": True, "result": captured_output}
         except Exception as e:
-            raise Exception(f"Code execution error: {str(e)}")
+            return {
+                "executed": False,
+                "error": str(e),
+                "traceback": traceback.format_exc(),
+            }
 
 
 
